@@ -66,3 +66,6 @@ COPY --from=build-stage /build/docservice ${oo_root}/server/DocService/docservic
 COPY --from=build-stage /build/web-apps/deploy/web-apps/apps/documenteditor/mobile/app.js     ${oo_root}/web-apps/apps/documenteditor/mobile/app.js
 COPY --from=build-stage /build/web-apps/deploy/web-apps/apps/presentationeditor/mobile/app.js ${oo_root}/web-apps/apps/presentationeditor/mobile/app.js
 COPY --from=build-stage /build/web-apps/deploy/web-apps/apps/spreadsheeteditor/mobile/app.js  ${oo_root}/web-apps/apps/spreadsheeteditor/mobile/app.js
+COPY --from=build-stage /build/web-apps/deploy/web-apps/apps/documenteditor/main/app.js     ${oo_root}/web-apps/apps/documenteditor/main/app.js
+COPY --from=build-stage /build/web-apps/deploy/web-apps/apps/presentationeditor/main/app.js ${oo_root}/web-apps/apps/presentationeditor/main/app.js
+COPY --from=build-stage /build/web-apps/deploy/web-apps/apps/spreadsheeteditor/main/app.js  ${oo_root}/web-apps/apps/spreadsheeteditor/main/app.js

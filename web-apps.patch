@@ -1,52 +1,36 @@
-From b99b3c2013521042374601e514d9e91c93372016 Mon Sep 17 00:00:00 2001
-From: Alexander Hofbauer <alex@derhofbauer.at>
-Date: Sat, 3 Jul 2021 08:29:29 +0200
-Subject: [PATCH] Revert "disable mobile editing"
-
-partially brings back mobile editing, especially via:
-
-  - 631cea5e0683c472ec5070f9f73f628def1fa259
-  - ae69d00eb7ca8874d7d645289f7bfecce2af5d37
-  - 35ea66e4407b8c948d5f5bb75b96c93a719ef210
-  - 19e4859e1051fe16697272be3bacaacc06cc9f40
-  - dc46e1b97f6aa80eb3b5039c5a13ab10637115ac
-  - 1ed80f9497222038da8845985786f5f0f4f5ad79
-  - 2ab911a439c904a1e1da81283b77639a1f1aa6b1
----
- .../mobile/app/controller/Main.js             |  9 +--
- .../mobile/app/controller/add/AddImage.js     |  7 ++
- .../mobile/app/controller/add/AddOther.js     | 63 +++++++++++++++++-
- .../mobile/app/controller/add/AddShape.js     |  7 ++
- .../mobile/app/controller/add/AddTable.js     | 26 +++++++-
- .../mobile/app/controller/edit/EditChart.js   | 32 +++++++++-
- .../app/controller/edit/EditParagraph.js      | 54 +++++++++++++++-
- .../mobile/app/controller/edit/EditShape.js   | 20 ++++++
- .../mobile/app/controller/edit/EditTable.js   | 25 ++++++++
- .../mobile/app/controller/edit/EditText.js    | 34 +++++++++-
- .../mobile/app/controller/Main.js             |  5 +-
- .../mobile/app/controller/add/AddImage.js     |  7 ++
- .../mobile/app/controller/add/AddLink.js      | 61 +++++++++++++++++-
- .../mobile/app/controller/add/AddShape.js     |  7 ++
- .../mobile/app/controller/add/AddSlide.js     | 34 +++++++++-
- .../mobile/app/controller/add/AddTable.js     | 31 ++++++++-
- .../mobile/app/controller/edit/EditChart.js   | 26 +++++++-
- .../mobile/app/controller/edit/EditShape.js   | 16 +++++
- .../mobile/app/controller/edit/EditSlide.js   | 45 ++++++++++++-
- .../mobile/app/controller/edit/EditTable.js   | 23 +++++++
- .../mobile/app/controller/edit/EditText.js    | 42 +++++++++++-
- .../mobile/app/controller/Main.js             |  5 +-
- .../mobile/app/controller/add/AddChart.js     |  4 ++
- .../mobile/app/controller/add/AddFunction.js  | 41 +++++++++++-
- .../mobile/app/controller/add/AddLink.js      | 47 +++++++++++++-
- .../mobile/app/controller/add/AddOther.js     | 10 +++
- .../mobile/app/controller/add/AddShape.js     |  6 ++
- .../mobile/app/controller/edit/EditCell.js    | 45 ++++++++++++-
- .../mobile/app/controller/edit/EditChart.js   | 64 ++++++++++++++++++-
- .../mobile/app/controller/edit/EditShape.js   | 19 ++++++
- 30 files changed, 786 insertions(+), 29 deletions(-)
-
+diff --git a/apps/documenteditor/main/app/controller/Main.js b/apps/documenteditor/main/app/controller/Main.js
+index 8c929dd..b0ce281 100644
+--- a/apps/documenteditor/main/app/controller/Main.js
++++ b/apps/documenteditor/main/app/controller/Main.js
+@@ -1214,18 +1214,6 @@ define([
+                             }
+                         });
+                     }
+-                } else if (!this.appOptions.isDesktopApp && !this.appOptions.canBrandingExt &&
+-                            this.editorConfig && this.editorConfig.customization && (this.editorConfig.customization.loaderName || this.editorConfig.customization.loaderLogo)) {
+-                    Common.UI.warning({
+-                        title: this.textPaidFeature,
+-                        msg  : this.textCustomLoader,
+-                        buttons: [{value: 'contact', caption: this.textContactUs}, {value: 'close', caption: this.textClose}],
+-                        primary: 'contact',
+-                        callback: function(btn) {
+-                            if (btn == 'contact')
+-                                window.open('mailto:{{SALES_EMAIL}}', "_blank");
+-                        }
+-                    });
+                 }
+             },
+ 
+@@ -2820,7 +2808,6 @@ define([
+             txtUndefBookmark: 'Undefined Bookmark',
+             txtEndOfFormula: 'Unexpected End of Formula',
+             errorEmailClient: 'No email client could be found',
+-            textCustomLoader: 'Please note that according to the terms of the license you are not entitled to change the loader.<br>Please contact our Sales Department to get a quote.',
+             txtHyperlink: 'Hyperlink',
+             waitText: 'Please, wait...',
+             errorFileSizeExceed: 'The file size exceeds the limitation set for your server.<br>Please contact your Document Server administrator for details.',
 diff --git a/apps/documenteditor/mobile/app/controller/Main.js b/apps/documenteditor/mobile/app/controller/Main.js
-index b53ab6578..661444a9c 100644
+index b53ab65..ea0843c 100644
 --- a/apps/documenteditor/mobile/app/controller/Main.js
 +++ b/apps/documenteditor/mobile/app/controller/Main.js
 @@ -289,7 +289,7 @@ define([
@@ -58,7 +42,29 @@ index b53ab6578..661444a9c 100644
                      var type = /^(?:(pdf|djvu|xps))$/.exec(data.doc.fileType);
                      if (type && typeof type[1] === 'string') {
                          this.permissions.edit = this.permissions.review = false;
-@@ -843,7 +843,7 @@ define([
+@@ -740,21 +740,6 @@ define([
+                         });
+                     }
+                 } else {
+-                    if (!me.appOptions.isDesktopApp && !me.appOptions.canBrandingExt &&
+-                        me.editorConfig && me.editorConfig.customization && (me.editorConfig.customization.loaderName || me.editorConfig.customization.loaderLogo)) {
+-                        uiApp.modal({
+-                            title: me.textPaidFeature,
+-                            text  : me.textCustomLoader,
+-                            buttons: [{
+-                                        text: me.textContactUs,
+-                                        bold: true,
+-                                        onClick: function() {
+-                                            window.open('mailto:{{SALES_EMAIL}}', "_blank");
+-                                        }
+-                                    },
+-                                    { text: me.textClose }]
+-                        });
+-                    }
+                     DE.getController('Toolbar').activateControls();
+                 }
+             },
+@@ -843,7 +828,7 @@ define([
                  Common.Utils.UserInfoParser.setParser(me.appOptions.canUseReviewPermissions);
                  Common.Utils.UserInfoParser.setCurrentName(me.appOptions.user.fullname);
                  me.appOptions.canUseReviewPermissions && Common.Utils.UserInfoParser.setReviewPermissions(me.permissions.reviewGroups, me.editorConfig.customization.reviewPermissions);
@@ -67,7 +73,7 @@ index b53ab6578..661444a9c 100644
                  me.applyModeCommonElements();
                  me.applyModeEditorElements();
  
-@@ -1244,6 +1244,7 @@ define([
+@@ -1244,6 +1229,7 @@ define([
              },
  
              onSendThemeColors: function(colors, standart_colors) {
@@ -75,7 +81,7 @@ index b53ab6578..661444a9c 100644
              },
  
              onAdvancedOptions: function(type, advOptions, mode, formatOptions) {
-@@ -1449,7 +1450,7 @@ define([
+@@ -1449,7 +1435,7 @@ define([
              },
  
              isSupportEditFeature: function() {
@@ -84,7 +90,15 @@ index b53ab6578..661444a9c 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1658,4 +1659,4 @@ define([
+@@ -1631,7 +1617,6 @@ define([
+             errorAccessDeny: 'You are trying to perform an action you do not have rights for.<br>Please contact your Document Server administrator.',
+             errorEditingDownloadas: 'An error occurred during the work with the document.<br>Use the \'Download\' option to save the file backup copy to your computer hard drive.',
+             textPaidFeature: 'Paid feature',
+-            textCustomLoader: 'Please note that according to the terms of the license you are not entitled to change the loader.<br>Please contact our Sales Department to get a quote.',
+             waitText: 'Please, wait...',
+             errorFileSizeExceed: 'The file size exceeds the limitation set for your server.<br>Please contact your Document Server administrator for details.',
+             errorUpdateVersionOnDisconnect: 'Internet connection has been restored, and the file version has been changed.<br>Before you can continue working, you need to download the file or copy its content to make sure nothing is lost, and then reload this page.',
+@@ -1658,4 +1643,4 @@ define([
              errorLang: 'The interface language is not loaded.<br>Please contact your Document Server administrator.'
          }
      })(), DE.Controllers.Main || {}))
@@ -92,7 +106,7 @@ index b53ab6578..661444a9c 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/add/AddImage.js b/apps/documenteditor/mobile/app/controller/add/AddImage.js
-index 16ab14528..0a5faaa2d 100644
+index 16ab145..0a5faaa 100644
 --- a/apps/documenteditor/mobile/app/controller/add/AddImage.js
 +++ b/apps/documenteditor/mobile/app/controller/add/AddImage.js
 @@ -98,6 +98,10 @@ define([
@@ -117,7 +131,7 @@ index 16ab14528..0a5faaa2d 100644
                              uiApp.alert(me.txtNotUrl, me.notcriticalErrorTitle);
                          }
 diff --git a/apps/documenteditor/mobile/app/controller/add/AddOther.js b/apps/documenteditor/mobile/app/controller/add/AddOther.js
-index 9dca563e3..ff5fc6bc8 100644
+index 9dca563..ff5fc6b 100644
 --- a/apps/documenteditor/mobile/app/controller/add/AddOther.js
 +++ b/apps/documenteditor/mobile/app/controller/add/AddOther.js
 @@ -238,7 +238,40 @@ define([
@@ -203,7 +217,7 @@ index 9dca563e3..ff5fc6bc8 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/add/AddShape.js b/apps/documenteditor/mobile/app/controller/add/AddShape.js
-index 32047d3dd..c8345c7af 100644
+index 32047d3..c8345c7 100644
 --- a/apps/documenteditor/mobile/app/controller/add/AddShape.js
 +++ b/apps/documenteditor/mobile/app/controller/add/AddShape.js
 @@ -215,6 +215,13 @@ define([
@@ -221,7 +235,7 @@ index 32047d3dd..c8345c7af 100644
              },
  
 diff --git a/apps/documenteditor/mobile/app/controller/add/AddTable.js b/apps/documenteditor/mobile/app/controller/add/AddTable.js
-index fef864537..a9dd39cf6 100644
+index fef8645..a9dd39c 100644
 --- a/apps/documenteditor/mobile/app/controller/add/AddTable.js
 +++ b/apps/documenteditor/mobile/app/controller/add/AddTable.js
 @@ -74,6 +74,8 @@ define([
@@ -276,7 +290,7 @@ index fef864537..a9dd39cf6 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditChart.js b/apps/documenteditor/mobile/app/controller/edit/EditChart.js
-index b2cc3d9cd..8b27b1c8c 100644
+index b2cc3d9..8b27b1c 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditChart.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditChart.js
 @@ -135,6 +135,7 @@ define([
@@ -348,7 +362,7 @@ index b2cc3d9cd..8b27b1c8c 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js b/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
-index 114601e6a..778d62bdd 100644
+index 114601e..778d62b 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditParagraph.js
 @@ -75,6 +75,7 @@ define([
@@ -438,7 +452,7 @@ index 114601e6a..778d62bdd 100644
 \ No newline at end of file
 +});
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditShape.js b/apps/documenteditor/mobile/app/controller/edit/EditShape.js
-index 996c13543..76a4e68a1 100644
+index 996c135..76a4e68 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditShape.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditShape.js
 @@ -302,9 +302,29 @@ define([
@@ -472,7 +486,7 @@ index 996c13543..76a4e68a1 100644
  
              onWrapType: function (e) {
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditTable.js b/apps/documenteditor/mobile/app/controller/edit/EditTable.js
-index c94825acb..02cb7557d 100644
+index c94825a..02cb755 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditTable.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditTable.js
 @@ -123,6 +123,9 @@ define([
@@ -522,7 +536,7 @@ index c94825acb..02cb7557d 100644
  
              _closeIfNeed: function () {
 diff --git a/apps/documenteditor/mobile/app/controller/edit/EditText.js b/apps/documenteditor/mobile/app/controller/edit/EditText.js
-index 08f0ba0af..5126050f1 100644
+index 08f0ba0..5126050 100644
 --- a/apps/documenteditor/mobile/app/controller/edit/EditText.js
 +++ b/apps/documenteditor/mobile/app/controller/edit/EditText.js
 @@ -78,6 +78,21 @@ define([
@@ -578,11 +592,64 @@ index 08f0ba0af..5126050f1 100644
 -});
 \ No newline at end of file
 +});
+diff --git a/apps/presentationeditor/main/app/controller/Main.js b/apps/presentationeditor/main/app/controller/Main.js
+index 419c9a5..e554efd 100644
+--- a/apps/presentationeditor/main/app/controller/Main.js
++++ b/apps/presentationeditor/main/app/controller/Main.js
+@@ -931,18 +931,6 @@ define([
+                             }
+                         });
+                     }
+-                } else if (!this.appOptions.isDesktopApp && !this.appOptions.canBrandingExt &&
+-                    this.editorConfig && this.editorConfig.customization && (this.editorConfig.customization.loaderName || this.editorConfig.customization.loaderLogo)) {
+-                    Common.UI.warning({
+-                        title: this.textPaidFeature,
+-                        msg  : this.textCustomLoader,
+-                        buttons: [{value: 'contact', caption: this.textContactUs}, {value: 'close', caption: this.textClose}],
+-                        primary: 'contact',
+-                        callback: function(btn) {
+-                            if (btn == 'contact')
+-                                window.open('mailto:{{SALES_EMAIL}}', "_blank");
+-                        }
+-                    });
+                 }
+             },
+ 
+@@ -2467,7 +2455,6 @@ define([
+             txtShape_polyline1: 'Scribble',
+             txtShape_polyline2: 'Freeform',
+             errorEmailClient: 'No email client could be found',
+-            textCustomLoader: 'Please note that according to the terms of the license you are not entitled to change the loader.<br>Please contact our Sales Department to get a quote.',
+             waitText: 'Please, wait...',
+             errorFileSizeExceed: 'The file size exceeds the limitation set for your server.<br>Please contact your Document Server administrator for details.',
+             errorUpdateVersionOnDisconnect: 'Internet connection has been restored, and the file version has been changed.<br>Before you can continue working, you need to download the file or copy its content to make sure nothing is lost, and then reload this page.',
 diff --git a/apps/presentationeditor/mobile/app/controller/Main.js b/apps/presentationeditor/mobile/app/controller/Main.js
-index 012b4ce3d..c36e6396a 100644
+index 012b4ce..3b1886a 100644
 --- a/apps/presentationeditor/mobile/app/controller/Main.js
 +++ b/apps/presentationeditor/mobile/app/controller/Main.js
-@@ -1190,6 +1190,7 @@ define([
+@@ -672,21 +672,6 @@ define([
+                         });
+                     }
+                 }  else {
+-                    if (!me.appOptions.isDesktopApp && !me.appOptions.canBrandingExt &&
+-                        me.editorConfig && me.editorConfig.customization && (me.editorConfig.customization.loaderName || me.editorConfig.customization.loaderLogo)) {
+-                        uiApp.modal({
+-                            title: me.textPaidFeature,
+-                            text  : me.textCustomLoader,
+-                            buttons: [{
+-                                text: me.textContactUs,
+-                                bold: true,
+-                                onClick: function() {
+-                                    window.open('mailto:{{SALES_EMAIL}}', "_blank");
+-                                }
+-                            },
+-                                { text: me.textClose }]
+-                        });
+-                    }
+                     PE.getController('Toolbar').activateControls();
+                 }
+             },
+@@ -1190,6 +1175,7 @@ define([
              },
  
              onSendThemeColors: function(colors, standart_colors) {
@@ -590,7 +657,7 @@ index 012b4ce3d..c36e6396a 100644
              },
  
              onFocusObject: function(SelectedObjects) {
-@@ -1350,7 +1351,7 @@ define([
+@@ -1350,7 +1336,7 @@ define([
              },
  
              isSupportEditFeature: function() {
@@ -599,7 +666,15 @@ index 012b4ce3d..c36e6396a 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1588,4 +1589,4 @@ define([
+@@ -1569,7 +1555,6 @@ define([
+             errorAccessDeny: 'You are trying to perform an action you do not have rights for.<br>Please contact your Document Server administrator.',
+             errorEditingDownloadas: 'An error occurred during the work with the document.<br>Use the \'Download\' option to save the file backup copy to your computer hard drive.',
+             textPaidFeature: 'Paid feature',
+-            textCustomLoader: 'Please note that according to the terms of the license you are not entitled to change the loader.<br>Please contact our Sales Department to get a quote.',
+             waitText: 'Please, wait...',
+             errorFileSizeExceed: 'The file size exceeds the limitation set for your server.<br>Please contact your Document Server administrator for details.',
+             errorUpdateVersionOnDisconnect: 'Internet connection has been restored, and the file version has been changed.<br>Before you can continue working, you need to download the file or copy its content to make sure nothing is lost, and then reload this page.',
+@@ -1588,4 +1573,4 @@ define([
              errorLang: 'The interface language is not loaded.<br>Please contact your Document Server administrator.'
          }
      })(), PE.Controllers.Main || {}))
@@ -607,7 +682,7 @@ index 012b4ce3d..c36e6396a 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/add/AddImage.js b/apps/presentationeditor/mobile/app/controller/add/AddImage.js
-index d95a8859a..617152918 100644
+index d95a885..6171529 100644
 --- a/apps/presentationeditor/mobile/app/controller/add/AddImage.js
 +++ b/apps/presentationeditor/mobile/app/controller/add/AddImage.js
 @@ -95,6 +95,10 @@ define([
@@ -632,7 +707,7 @@ index d95a8859a..617152918 100644
                              uiApp.alert(me.txtNotUrl, me.notcriticalErrorTitle);
                          }
 diff --git a/apps/presentationeditor/mobile/app/controller/add/AddLink.js b/apps/presentationeditor/mobile/app/controller/add/AddLink.js
-index ee2a12938..624df79c0 100644
+index ee2a129..624df79 100644
 --- a/apps/presentationeditor/mobile/app/controller/add/AddLink.js
 +++ b/apps/presentationeditor/mobile/app/controller/add/AddLink.js
 @@ -169,6 +169,65 @@ define([
@@ -709,7 +784,7 @@ index ee2a12938..624df79c0 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/add/AddShape.js b/apps/presentationeditor/mobile/app/controller/add/AddShape.js
-index be2ef1ecf..12c4c9f17 100644
+index be2ef1e..12c4c9f 100644
 --- a/apps/presentationeditor/mobile/app/controller/add/AddShape.js
 +++ b/apps/presentationeditor/mobile/app/controller/add/AddShape.js
 @@ -212,6 +212,13 @@ define([
@@ -727,7 +802,7 @@ index be2ef1ecf..12c4c9f17 100644
              },
  
 diff --git a/apps/presentationeditor/mobile/app/controller/add/AddSlide.js b/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
-index 4ffccc101..4e5148d90 100644
+index 4ffccc1..4e5148d 100644
 --- a/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
 +++ b/apps/presentationeditor/mobile/app/controller/add/AddSlide.js
 @@ -63,6 +63,7 @@ define([
@@ -787,7 +862,7 @@ index 4ffccc101..4e5148d90 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/add/AddTable.js b/apps/presentationeditor/mobile/app/controller/add/AddTable.js
-index 193e9ea59..7fa075c05 100644
+index 193e9ea..7fa075c 100644
 --- a/apps/presentationeditor/mobile/app/controller/add/AddTable.js
 +++ b/apps/presentationeditor/mobile/app/controller/add/AddTable.js
 @@ -57,15 +57,27 @@ define([
@@ -849,7 +924,7 @@ index 193e9ea59..7fa075c05 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditChart.js b/apps/presentationeditor/mobile/app/controller/edit/EditChart.js
-index c80df4edc..0d5642e6c 100644
+index c80df4e..0d5642e 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditChart.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditChart.js
 @@ -106,6 +106,7 @@ define([
@@ -908,7 +983,7 @@ index c80df4edc..0d5642e6c 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditShape.js b/apps/presentationeditor/mobile/app/controller/edit/EditShape.js
-index aa22af261..1c23e264d 100644
+index aa22af2..1c23e26 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditShape.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditShape.js
 @@ -235,6 +235,18 @@ define([
@@ -942,7 +1017,7 @@ index aa22af261..1c23e264d 100644
  
              onBorderSize: function (e) {
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
-index eaceadccd..0275e300d 100644
+index eaceadc..0275e30 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditSlide.js
 @@ -89,6 +89,7 @@ define([
@@ -1020,7 +1095,7 @@ index eaceadccd..0275e300d 100644
 \ No newline at end of file
 +});
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditTable.js b/apps/presentationeditor/mobile/app/controller/edit/EditTable.js
-index 280165d27..4e44175a5 100644
+index 280165d..4e44175 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditTable.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditTable.js
 @@ -112,6 +112,9 @@ define([
@@ -1068,7 +1143,7 @@ index 280165d27..4e44175a5 100644
          }
      })(), PE.Controllers.EditTable || {}))
 diff --git a/apps/presentationeditor/mobile/app/controller/edit/EditText.js b/apps/presentationeditor/mobile/app/controller/edit/EditText.js
-index 116758067..e40fde1ac 100644
+index 1167580..e40fde1 100644
 --- a/apps/presentationeditor/mobile/app/controller/edit/EditText.js
 +++ b/apps/presentationeditor/mobile/app/controller/edit/EditText.js
 @@ -80,6 +80,30 @@ define([
@@ -1132,11 +1207,64 @@ index 116758067..e40fde1ac 100644
 -});
 \ No newline at end of file
 +});
+diff --git a/apps/spreadsheeteditor/main/app/controller/Main.js b/apps/spreadsheeteditor/main/app/controller/Main.js
+index 54d99ba..ae590cb 100644
+--- a/apps/spreadsheeteditor/main/app/controller/Main.js
++++ b/apps/spreadsheeteditor/main/app/controller/Main.js
+@@ -1004,18 +1004,6 @@ define([
+                             }
+                         });
+                     }
+-                } else if (!this.appOptions.isDesktopApp && !this.appOptions.canBrandingExt && !(this.appOptions.isEditDiagram || this.appOptions.isEditMailMerge) &&
+-                    this.editorConfig && this.editorConfig.customization && (this.editorConfig.customization.loaderName || this.editorConfig.customization.loaderLogo)) {
+-                    Common.UI.warning({
+-                        title: this.textPaidFeature,
+-                        msg  : this.textCustomLoader,
+-                        buttons: [{value: 'contact', caption: this.textContactUs}, {value: 'close', caption: this.textClose}],
+-                        primary: 'contact',
+-                        callback: function(btn) {
+-                            if (btn == 'contact')
+-                                window.open('mailto:{{SALES_EMAIL}}', "_blank");
+-                        }
+-                    });
+                 }
+             },
+ 
+@@ -2799,7 +2787,6 @@ define([
+             errorEmailClient: 'No email client could be found',
+             txtPrintArea: 'Print_Area',
+             txtTable: 'Table',
+-            textCustomLoader: 'Please note that according to the terms of the license you are not entitled to change the loader.<br>Please contact our Sales Department to get a quote.',
+             errorNoDataToParse: 'No data was selected to parse.',
+             errorCannotUngroup: 'Cannot ungroup. To start an outline, select the detail rows or columns and group them.',
+             errorFrmlMaxTextLength: 'Text values in formulas are limited to 255 characters.<br>Use the CONCATENATE function or concatenation operator (&)',
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/Main.js b/apps/spreadsheeteditor/mobile/app/controller/Main.js
-index 71f96d868..883eca8cd 100644
+index 71f96d8..38d21d4 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/Main.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/Main.js
-@@ -1332,6 +1332,7 @@ define([
+@@ -697,21 +697,6 @@ define([
+                         });
+                     }
+                 } else {
+-                    if (!me.appOptions.isDesktopApp && !me.appOptions.canBrandingExt &&
+-                        me.editorConfig && me.editorConfig.customization && (me.editorConfig.customization.loaderName || me.editorConfig.customization.loaderLogo)) {
+-                        uiApp.modal({
+-                            title: me.textPaidFeature,
+-                            text  : me.textCustomLoader,
+-                            buttons: [{
+-                                text: me.textContactUs,
+-                                bold: true,
+-                                onClick: function() {
+-                                    window.open('mailto:{{SALES_EMAIL}}', "_blank");
+-                                }
+-                            },
+-                                { text: me.textClose }]
+-                        });
+-                    }
+                     SSE.getController('Toolbar').activateControls();
+                 }
+             },
+@@ -1332,6 +1317,7 @@ define([
              },
  
              onSendThemeColors: function(colors, standart_colors) {
@@ -1144,7 +1272,7 @@ index 71f96d868..883eca8cd 100644
              },
  
              onAdvancedOptions: function(type, advOptions, mode, formatOptions) {
-@@ -1553,7 +1554,7 @@ define([
+@@ -1553,7 +1539,7 @@ define([
              },
  
              isSupportEditFeature: function() {
@@ -1153,7 +1281,15 @@ index 71f96d868..883eca8cd 100644
              },
  
              onRunAutostartMacroses: function() {
-@@ -1810,4 +1811,4 @@ define([
+@@ -1790,7 +1776,6 @@ define([
+             errorEditingDownloadas: 'An error occurred during the work with the document.<br>Use the \'Download\' option to save the file backup copy to your computer hard drive.',
+             errorMultiCellFormula: 'Multi-cell array formulas are not allowed in tables.',
+             textPaidFeature: 'Paid feature',
+-            textCustomLoader: 'Please note that according to the terms of the license you are not entitled to change the loader.<br>Please contact our Sales Department to get a quote.',
+             errorFrmlMaxTextLength: 'Text values in formulas are limited to 255 characters.<br>Use the CONCATENATE function or concatenation operator (&)',
+             waitText: 'Please, wait...',
+             errorFileSizeExceed: 'The file size exceeds the limitation set for your server.<br>Please contact your Document Server administrator for details.',
+@@ -1810,4 +1795,4 @@ define([
              errorLang: 'The interface language is not loaded.<br>Please contact your Document Server administrator.'
          }
      })(), SSE.Controllers.Main || {}))
@@ -1161,7 +1297,7 @@ index 71f96d868..883eca8cd 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js
-index bb91e2c39..58015d747 100644
+index bb91e2c..58015d7 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddChart.js
 @@ -78,6 +78,10 @@ define([
@@ -1176,7 +1312,7 @@ index bb91e2c39..58015d747 100644
  
              txtDiagramTitle:    'Chart Title',
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
-index 2f8e89353..964438c17 100644
+index 2f8e893..964438c 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddFunction.js
 @@ -112,17 +112,52 @@ define([
@@ -1242,7 +1378,7 @@ index 2f8e89353..964438c17 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js
-index de4821e92..100de77e8 100644
+index de4821e..100de77 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddLink.js
 @@ -171,6 +171,51 @@ define([
@@ -1305,7 +1441,7 @@ index de4821e92..100de77e8 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js
-index dd1096405..776d18f92 100644
+index dd10964..776d18f 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddOther.js
 @@ -174,6 +174,10 @@ define([
@@ -1340,7 +1476,7 @@ index dd1096405..776d18f92 100644
  
              onError: function(id, level, errData) {
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js b/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js
-index b7a1cbcf2..b3411de3b 100644
+index b7a1cbc..b3411de 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/add/AddShape.js
 @@ -211,6 +211,12 @@ define([
@@ -1357,7 +1493,7 @@ index b7a1cbcf2..b3411de3b 100644
              },
  
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
-index ef9666471..d75035de8 100644
+index ef96664..d75035d 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditCell.js
 @@ -85,8 +85,10 @@ define([
@@ -1445,7 +1581,7 @@ index ef9666471..d75035de8 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
-index 0bacfd0e2..5fa56e946 100644
+index 0bacfd0..5fa56e9 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditChart.js
 @@ -107,7 +107,13 @@ define([
@@ -1550,7 +1686,7 @@ index 0bacfd0e2..5fa56e946 100644
 \ No newline at end of file
 +});
 diff --git a/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js b/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
-index 83e225529..5f701a46d 100644
+index 83e2255..5f701a4 100644
 --- a/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
 +++ b/apps/spreadsheeteditor/mobile/app/controller/edit/EditShape.js
 @@ -242,9 +242,28 @@ define([
@@ -1582,6 +1718,3 @@ index 83e225529..5f701a46d 100644
              },
  
              onBorderSize: function (e) {
--- 
-2.32.0.rc2
-
